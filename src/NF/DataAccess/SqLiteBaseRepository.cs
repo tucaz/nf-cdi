@@ -1,6 +1,8 @@
 using System.Data.SQLite;
 using System.IO;
 using Dapper;
+using NF.Hotmart;
+using NF.NotaFiscal;
 
 namespace NF.DataAccess
 {
@@ -10,7 +12,12 @@ namespace NF.DataAccess
 
         public static void Init()
         {
-            if (File.Exists(DbFile)) return;
+	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Transaction>());
+	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Member>());
+	        SqlMapper.AddTypeHandler(new JsonTypeHandler<EnviarLoteRpsEnvio>());
+	        SqlMapper.AddTypeHandler(new JsonTypeHandler<EnviarLoteRpsResposta>());
+	        
+	        if (File.Exists(DbFile)) return;
             
             using (var conn = DbConnection())
             {
@@ -31,8 +38,8 @@ namespace NF.DataAccess
 	nf_response_xml Text NULL,
 	valid BIT NULL,
 	sent BIT NOT NULL,
-	is_foreigner INTEGER NOT NULL,
-	invalid_address INTEGER NOT NULL,
+	is_foreigner BIT NOT NULL,
+	invalid_address BIT NOT NULL,
 	created DATETIME NOT NULL
 )";
             
