@@ -97,6 +97,8 @@ namespace NF.NotaFiscal
     {
         [XmlElement(ElementName = "Cpf", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
         public string Cpf { get; set; }
+        [XmlElement(ElementName = "Cnpj", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
+        public string Cnpj { get; set; }
     }
 
     [XmlRoot(ElementName = "IdentificacaoTomador", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
@@ -164,7 +166,9 @@ namespace NF.NotaFiscal
 
         [XmlElement(ElementName = "NaturezaOperacao", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
         public string NaturezaOperacao { get; set; }
-
+        
+        [XmlElement(ElementName = "RegimeEspecialTributacao", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
+        public string RegimeEspecialTributacao { get; set; }
 
         [XmlElement(ElementName = "OptanteSimplesNacional", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
         public string OptanteSimplesNacional { get; set; }

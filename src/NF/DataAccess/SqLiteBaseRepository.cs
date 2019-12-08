@@ -16,8 +16,9 @@ namespace NF.DataAccess
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Member>());
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<EnviarLoteRpsEnvio>());
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<EnviarLoteRpsResposta>());
-	        
-	        if (File.Exists(DbFile)) return;
+	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Validacao>());
+
+	        if (File.Exists(DbFile)) return; //File.Delete(DbFile);
             
             using (var conn = DbConnection())
             {
@@ -33,13 +34,17 @@ namespace NF.DataAccess
 	purchase Text NOT NULL,
 	nf_number INTEGER NOT NULL,
 	nf_request Text NOT NULL,
-	nf_request_xml Text NOT NULL,
+	nf_request_xml Text NOT NULL,	
+	valid BIT NULL,
+	validation Text NULL,
+	validation_xml Text NULL,
+	sent BIT NOT NULL,
+	sucessfully_transmitted BIT NULL,
 	nf_response Text NULL,
 	nf_response_xml Text NULL,
-	valid BIT NULL,
-	sent BIT NOT NULL,
 	is_foreigner BIT NOT NULL,
 	invalid_address BIT NOT NULL,
+	us_dolar BIT NOT NULL,
 	created DATETIME NOT NULL
 )";
             
