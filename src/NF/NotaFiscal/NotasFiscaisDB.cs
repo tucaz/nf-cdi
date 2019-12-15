@@ -47,8 +47,9 @@ namespace NF.NotaFiscal
         public static async Task<List<NotaFiscal>> LoadAllNotasFiscais()
         {
             const string sql =
-                "SELECT id as Id, member as HotmartMember, purchase as HotmartTransaction , nf_number as Numero, nf_request as NotaFiscalRequest, nf_request_xml as NotaFiscalRequestXML, nf_response as NotaFiscalResponse, nf_response_xml as NotaFiscaResponseXML, sent as Sent, is_foreigner as IsForeigner, invalid_address as InvalidAddress, us_dolar as IsUSDolar, valid as Valid, validation as Validation, validation_xml as ValidationXML, created as Created FROM nota_fiscal";
-            return await SqLiteBaseRepository.DbConnection().Query<NotaFiscal>(sql);
+                "SELECT id as Id, member as HotmartMember, purchase as HotmartTransaction , nf_number as Numero, nf_request as NotaFiscalRequest, nf_request_xml as NotaFiscalRequestXML, nf_response as NotaFiscalResponse, nf_response_xml as NotaFiscaResponseXML, sent as Sent, sucessfully_transmitted as SuccessfullyTransmitted, is_foreigner as IsForeigner, invalid_address as InvalidAddress, us_dolar as IsUSDolar, valid as Valid, validation as Validation, validation_xml as ValidationXML, created as Created FROM nota_fiscal";
+            var results = await SqLiteBaseRepository.DbConnection().Query<NotaFiscal>(sql);
+            return results.Where(nf => nf.Numero != 212 && nf.Numero != 222).ToList();
         }
 
         /// <summary>

@@ -162,7 +162,7 @@ namespace NF.NotaFiscal
         public IdentificacaoRps IdentificacaoRps { get; set; }
 
         [XmlElement(ElementName = "DataEmissao", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
-        public DateTime DataEmissao { get; set; }
+        public string DataEmissao { get; set; }
 
         [XmlElement(ElementName = "NaturezaOperacao", Namespace = "http://www.ginfes.com.br/tipos_v03.xsd")]
         public string NaturezaOperacao { get; set; }

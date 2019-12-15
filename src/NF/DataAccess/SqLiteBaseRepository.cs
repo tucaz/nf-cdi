@@ -1,6 +1,7 @@
 using System.Data.SQLite;
 using System.IO;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using NF.Hotmart;
 using NF.NotaFiscal;
 
@@ -10,7 +11,7 @@ namespace NF.DataAccess
     {
         private static string DbFile => Path.Combine(@"C:\temp","NF.sqlite");
 
-        public static void Init()
+        public static void Init(ILogger logger)
         {
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Transaction>());
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Member>());
@@ -18,11 +19,18 @@ namespace NF.DataAccess
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<EnviarLoteRpsResposta>());
 	        SqlMapper.AddTypeHandler(new JsonTypeHandler<Validacao>());
 
-	        if (File.Exists(DbFile)) return; //File.Delete(DbFile);
+	        if (File.Exists(DbFile))
+	        {
+		        logger.LogInformation($"{DbFile} exists. Moving on.");
+		        return;
+		        //File.Delete(DbFile);
+	        }
             
             using (var conn = DbConnection())
             {
-                conn.CreateTables();
+                logger.LogInformation($"{DbFile} does not exist. Let's create the file and some tables.");
+	            conn.CreateTables();
+	            logger.LogInformation("Tables created. Moving on.");
             }
         }
 

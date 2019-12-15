@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using CsvHelper;
-using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 using NF;
 using NF.DataAccess;
 using NF.Hotmart;
@@ -24,8 +18,8 @@ namespace Run
         {
             const string sql = "SELECT member as Member, purchase as `Transaction` FROM nota_fiscal";
 
-            SqLiteBaseRepository.Init();
-            
+            SqLiteBaseRepository.Init(null);
+
             var data = await SqLiteBaseRepository.DbConnection().Query<TransactionData>(sql);
 
             using (var writer = new StreamWriter(@"C:\temp\report.csv"))
@@ -47,68 +41,38 @@ namespace Run
     class Program
     {
         public static IConfigurationRoot Configuration { get; set; }
+        public static ServiceProvider ServiceProvider { get; set; }
         public static Global GlobalConfiguration { get; } = new Global();
 
         static async Task Main(string[] args)
         {
             Setup();
 
+            var logger = ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-//            await CreateNotasFiscaisFromHotmartTransactions();
-//            await SendNotasFiscaisToValidation();
-//            await ProcessValidationResults();
-            await TransmitNotasFiscais();
-//            await ProcessTransmissionResults();
-
-        }
-
-        private static async Task ProcessTransmissionResults()
-        {
-            var nfs = (await NotasFiscaisDb.LoadAllNotasFiscais())
-                .Where(nf => nf.ReadyForTransmissionResult)
-                .ToList();
-
-            await NotasFiscais.ProcessResultsFromTransmission(nfs,
-                @"C:\Program Files\Unimake\UniNFe\34231972000109\nfse\Retorno\",
-                @"C:\Program Files\Unimake\UniNFe\34231972000109\nfse\Erro\");
-        }
-
-        private static async Task TransmitNotasFiscais()
-        {
-            var nfs = (await NotasFiscaisDb.LoadAllNotasFiscais())
-                .Where(nf => nf.ReadyForTransmission)
-                .OrderBy(nf => nf.Numero)
-                .Take(5)
-                .ToList();
+            //TODO: Add an initial checking step that will offer options depending on what's already in the database and in the disk
+            //Check stuff like: 
+            //1. Is there a database?
+            //2. Are there files being validated?
             
-            await NotasFiscais.SendNotasFiscaisToReceita(nfs,
-                @"C:\Program Files\Unimake\UniNFe\34231972000109\nfse\Envio\");
-        }
+            //TODO: Make consulta LoteRPS based on protocol to get final information about what worked and what didn't
+            //TODO: 1 nota fiscal between 20 and 70 failed (starting from 5)
 
-        private static async Task ProcessValidationResults()
-        {
-            var nfs = (await NotasFiscaisDb.LoadAllNotasFiscais())
-                .Where(nf => nf.ReadyForValidation)
-                .ToList();
+            try
+            {
+                var process = ServiceProvider.GetService<ProcessNotasFiscais>();
 
-            var files = NotasFiscais.ProcessResultsFromValidation(nfs,
-                @"C:\Program Files\Unimake\UniNFe\34231972000109\nfse\Retorno");
-        }
-
-        private static async Task SendNotasFiscaisToValidation()
-        {
-            var nfs = (await NotasFiscaisDb.LoadAllNotasFiscais())
-                .Where(nf => nf.ReadyForValidation)
-                .ToList();
-
-
-            await NotasFiscais.SendNotasFiscaisToValidation(nfs,
-                @"C:\Program Files\Unimake\UniNFe\34231972000109\nfse\Validar\");
-        }
-
-        private static async Task CreateNotasFiscaisFromHotmartTransactions()
-        {
-            await NotasFiscais.GenerateNotasFiscais(5);
+//                await process.CreateNotasFiscaisFromHotmartTransactions();
+//                await process.SendNotasFiscaisToValidation();
+//                await process.ProcessValidationResults();
+//                await process.TransmitNotasFiscais();
+                await process.ProcessTransmissionResults();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "CRITICAL EXCEPTION! OMG!");
+                throw;
+            }
         }
 
         private static void Setup()
@@ -118,6 +82,8 @@ namespace Run
             var isDevelopment = string.IsNullOrEmpty(devEnvironmentVariable) ||
                                 devEnvironmentVariable.ToLower() == "development";
             //Determines the working environment as IHostingEnvironment is unavailable in a console app
+
+            IServiceCollection collection = new ServiceCollection();
 
             var builder = new ConfigurationBuilder();
             // tell the builder to look for the appsettings.json file
@@ -132,8 +98,21 @@ namespace Run
 
             Configuration = builder.Build();
             Configuration.Bind(GlobalConfiguration);
-            
-            SqLiteBaseRepository.Init();
+
+            collection
+                .AddLogging(configure =>
+                    configure
+                        .ClearProviders()
+                        .AddConsole()
+                        .AddFile()
+                )
+                .AddSingleton<NotasFiscais>()
+                .AddTransient<ProcessNotasFiscais>();
+
+            ServiceProvider = collection.BuildServiceProvider();
+
+            var logger = ServiceProvider.GetService<ILogger<Program>>();
+            SqLiteBaseRepository.Init(logger);
         }
     }
 }

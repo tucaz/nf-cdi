@@ -37,10 +37,10 @@ namespace NF.NotaFiscal
         public string RetornoValidacao => $"{this.Numero}-env-loterps-ret.xml";
 
         public bool ReadyForValidation =>
-            !IsUSDolar && !InvalidAddress && HotmartTransaction.Purchase.Status == "COMPLETE";
+            !IsUSDolar && !InvalidAddress && HotmartTransaction.Purchase.Status == "COMPLETE" && !Valid.HasValue && !Sent;
 
-        public bool ReadyForTransmission => ReadyForValidation && Valid.HasValue && Valid.Value && !Sent;
-        public bool ReadyForTransmissionResult => ReadyForValidation && Valid.HasValue && Valid.Value && Sent && !SuccessfullyTransmitted.HasValue;
+        public bool ReadyForTransmission => Valid.HasValue && Valid.Value && !Sent;
+        public bool ReadyForTransmissionResult => Valid.HasValue && Valid.Value && Sent && !SuccessfullyTransmitted.HasValue;
 
         public static EnviarLoteRpsEnvio GenerateLoteRPS(int numeroLote, int numeroNF, Transaction transaction,
             out bool isForeigner, out bool invalidAddress, out bool isUSDolar)
@@ -60,7 +60,7 @@ namespace NF.NotaFiscal
             const string CodigoMunicipioPrestacaoServicoNF = "3547809";
             const string ItemListaServicoNF = "105"; //1.05
             const string ISSRetido = "2"; //1-Sim, 2-Não
-            const string RegimeTributacaoEspecial = "0";
+            const string RegimeTributacaoEspecial = "6";
             string DescricaoServicoNF = "Contratacao do Curso de Ingles NOVO Ingles - Modulo 01 - Codigo pedido <" + transaction.Purchase.Transaction + ">";
 
             var member = transaction.Buyer;
@@ -127,7 +127,8 @@ namespace NF.NotaFiscal
                         {
                             InfRps = new InfRps()
                             {
-                                DataEmissao = DateTime.Today,
+                                //2019-12-15T15:09:29
+                                DataEmissao = DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"),
                                 NaturezaOperacao = NaturezaOperacaoNF,
                                 OptanteSimplesNacional = OptanteSimplesNacionalNF,
                                 RegimeEspecialTributacao = RegimeTributacaoEspecial,
