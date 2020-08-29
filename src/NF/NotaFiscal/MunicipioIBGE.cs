@@ -69,14 +69,30 @@ namespace NF.NotaFiscal
         public static MunicipioIBGE Find(string uf, string cidade)
         {
             cidade = cidade.Trim();
+            cidade = FixCityName(cidade);
 
             if (uf == null)
                 return All.Find(ibge => string.Equals(ibge.NomeMunicipio.RemoveDiacritics(), cidade.RemoveDiacritics(),
                     StringComparison.CurrentCultureIgnoreCase));
-            
+
             return All.Find(ibge =>
                 string.Equals(ibge.NomeMunicipio.RemoveDiacritics(), cidade.RemoveDiacritics(),
                     StringComparison.CurrentCultureIgnoreCase) && ibge.SiglaUF == uf);
+        }
+
+        private static string FixCityName(string cidade)
+        {
+            switch (cidade)
+            {
+                case "Roças Novas (Caeté)":
+                    return "Caeté";
+                case "São Paulo - SP":
+                    return "São Paulo";
+                case "Mutum Paraná (Porto Velho)":
+                    return "Porto Velho";
+            }
+
+            return cidade;
         }
 
         private static List<MunicipioIBGE> _all;

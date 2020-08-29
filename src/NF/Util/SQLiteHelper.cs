@@ -34,8 +34,7 @@ public static class SQLiteHelper
         }
     }
 
-    public static async Task<List<T>> Query<T>(this SQLiteConnection connection, string sql,
-        bool enableExtensions = false)
+    public static async Task<List<T>> Query<T>(this SQLiteConnection connection, string sql, object param=null, bool enableExtensions = false)
     {
         using (connection)
         {
@@ -50,7 +49,7 @@ public static class SQLiteHelper
 
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var results = await connection.QueryAsync<T>(sql);
+                    var results = await connection.QueryAsync<T>(sql, param);
                     transaction.Commit();
                     return results.ToList();
                 }

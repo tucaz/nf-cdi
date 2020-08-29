@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MoreLinq.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using NF.Hotmart.DataContract;
 using NF.Util;
 using HttpRequestHeaders = System.Net.Http.Headers.HttpRequestHeaders;
 
@@ -74,7 +75,6 @@ namespace NF.Hotmart
                 "STARTED", "OVERDUE"
             };
             var totalPages = 0;
-            var format = "json";
             var allPages = page == 0;
             var baseUrl = "https://api-hot-connect.hotmart.com/subscriber/rest/v2";
             var subscriptions = new List<Subscription>();
@@ -131,11 +131,10 @@ namespace NF.Hotmart
                 "UNDER_ANALISYS", "CANCELLED", "PROTESTED", "REFUNDED", "CHARGEBACK", "BLOCKED", "OVERDUE", "PRE_ORDER"
             };
             var totalPages = 0;
-            var format = "json";
             var allPages = page == 0;
             var baseUrl = "https://api-hot-connect.hotmart.com/reports/rest/v2/history";
             var transactions = new List<Transaction>();
-            var startDate = DateTimeOffset.Now.AddMonths(-6);
+            var startDate = DateTimeOffset.Now.AddMonths(-12);
             var endDate = DateTimeOffset.Now;
             var selectedStatuses = approvedOnly ? approvedStatuses : allStatuses;
 

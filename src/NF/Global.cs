@@ -1,5 +1,6 @@
 using System.IO;
 using NF.Hotmart;
+using NF.Hotmart.DataContract;
 
 namespace NF
 {
